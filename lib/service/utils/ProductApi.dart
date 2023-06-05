@@ -73,6 +73,7 @@ class ProductClass {
     this.servingSizeImported,
     this.sortkey,
     required this.productName,
+    this.productQuantity,
   });
 
   String? id;
@@ -103,6 +104,7 @@ class ProductClass {
   List<String>? nutritionGradesTags;
   String? servingQuantity;
   String productName;
+  String? productQuantity;
   String? servingSize;
   String? servingSizeImported;
   int? sortkey;
@@ -121,8 +123,10 @@ class ProductClass {
         imageIngredientsUrl: json["image_ingredients_url"],
         imageNutritionUrl: json["image_nutrition_url"],
         imageUrl: json["image_url"],
-        ingredients: json["ingredients"] == null? null : List<Ingredient>.from(
-            json["ingredients"]?.map((x) => Ingredient.fromJson(x))),
+        ingredients: json["ingredients"] == null
+            ? null
+            : List<Ingredient>.from(
+                json["ingredients"]?.map((x) => Ingredient.fromJson(x))),
         // ingredientsHierarchy:
         //     List<String>.from(json["ingredients_hierarchy"].map((x) => x)),
         labels: json["labels"],
@@ -139,6 +143,7 @@ class ProductClass {
             List<String>.from(json["nutrition_grades_tags"].map((x) => x)),
         servingQuantity: json["serving_quantity"].toString(),
         productName: json["product_name"].toString(),
+        productQuantity: json["product_quantity"] == null ? null :json["product_quantity"].toString(),
         servingSize: json["serving_size"],
         servingSizeImported: json["serving_size_imported"].toString(),
         sortkey: json["sortkey"],
@@ -158,8 +163,9 @@ class ProductClass {
         "image_ingredients_url": imageIngredientsUrl,
         "image_nutrition_url": imageNutritionUrl,
         "image_url": imageUrl,
-        "ingredients":
-            ingredients == null ? null : List<dynamic>.from(ingredients!.map((x) => x.toJson())),
+        "ingredients": ingredients == null
+            ? null
+            : List<dynamic>.from(ingredients!.map((x) => x.toJson())),
         // "ingredients_hierarchy":
         //     List<dynamic>.from(ingredientsHierarchy!.map((x) => x)),
         "labels": labels,
@@ -176,6 +182,7 @@ class ProductClass {
             List<dynamic>.from(nutritionGradesTags!.map((x) => x)),
         "serving_quantity": servingQuantity,
         "product_name": productName,
+        "product_quantity": productQuantity,
         "serving_size": servingSize,
         "serving_size_imported": servingSizeImported,
         "sortkey": sortkey,

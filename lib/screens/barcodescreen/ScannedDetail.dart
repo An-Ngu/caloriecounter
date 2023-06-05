@@ -1,5 +1,6 @@
 import 'dart:async';
 
+import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
 import 'package:fl_chart/fl_chart.dart';
 
@@ -22,6 +23,8 @@ class _DetailPageState extends State<DetailPage> {
   double cal = 0;
   late Timer _timer;
 
+  final fieldText = TextEditingController();
+
   @override
   void initState() {
     // TODO: implement initState
@@ -29,9 +32,15 @@ class _DetailPageState extends State<DetailPage> {
     super.initState();
   }
 
+  clearText() {
+    fieldText.clear();
+  }
+
   @override
   Widget build(BuildContext context) {
-    Size size = MediaQuery.of(context).size;
+    Size size = MediaQuery
+        .of(context)
+        .size;
 
     return Scaffold(
         floatingActionButtonLocation: FloatingActionButtonLocation.centerDocked,
@@ -54,13 +63,13 @@ class _DetailPageState extends State<DetailPage> {
                   borderRadius: BorderRadius.circular(30),
                   child: widget.product.product.imageUrl == null
                       ? Image.asset(
-                          "assets/icons/nopictures.png",
-                          scale: 2.5,
-                        )
+                    "assets/icons/nopictures.png",
+                    scale: 2.5,
+                  )
                       : Image.network(
-                          widget.product.product.imageUrl!,
-                          scale: 2,
-                        ),
+                    widget.product.product.imageUrl!,
+                    scale: 2,
+                  ),
                 ),
                 SizedBox(
                   height: size.height * 0.05,
@@ -107,27 +116,17 @@ class _DetailPageState extends State<DetailPage> {
                 Row(
                   mainAxisAlignment: MainAxisAlignment.spaceEvenly,
                   children: [
-                    buttonAdd2((-1)),
+                    buttonIncreaseDecrease((-1)),
                     Container(
                       padding:
-                          EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+                      EdgeInsets.symmetric(horizontal: 16, vertical: 8),
                       width: size.width * 0.3,
                       decoration: BoxDecoration(
                           border: Border.all(color: Colors.black38),
                           borderRadius: BorderRadius.circular(16)),
-                      child: TextField(
-                        readOnly: true,
-                        decoration:
-                            InputDecoration(hintText: "${gramms.toString()} g"),
-                        onTap: () {
-                          setState(() {
-                            gramms = 0;
-                          });
-                        },
-                        textAlign: TextAlign.center,
-                      ),
+                      child: grammIndikator(),
                     ),
-                    buttonAdd2((1)),
+                    buttonIncreaseDecrease((1)),
                   ],
                 ),
                 showIngredients(),
@@ -138,20 +137,25 @@ class _DetailPageState extends State<DetailPage> {
         ));
   }
 
-  Container buttonAdd(int value) {
-    return Container(
-        decoration: BoxDecoration(
-            color: value > 0 ? Color(0x6179ff80) : Color(0x4cff5555),
-            borderRadius: BorderRadius.circular(20),
-            border: Border.all(color: Colors.black38)),
-        child: TextButton(
-            onPressed: () {
-              _grammCounter(value);
-            },
-            child: Text(value.toString())));
+  TextField grammIndikator() {
+    return TextField(
+      onSubmitted: (String? string) {
+        clearText();
+        gramms = int.parse(string!);
+      },
+      keyboardType: TextInputType.number,
+      decoration: InputDecoration(hintText: "${gramms.toString()} g"),
+      controller: fieldText,
+      onTap: () {
+        setState(() {
+          setServiceSizeAsDefault();
+        });
+      },
+      textAlign: TextAlign.center,
+    );
   }
 
-  GestureDetector buttonAdd2(int value) {
+  GestureDetector buttonIncreaseDecrease(int value) {
     return GestureDetector(
       child: Container(
         height: 100,
@@ -161,31 +165,28 @@ class _DetailPageState extends State<DetailPage> {
             borderRadius: BorderRadius.circular(20),
             border: Border.all(color: Colors.black38)),
       ),
-      onTap: (){
-        setState(() {
-          _grammCounter(value);
-        });
-
-      },
-      onTapDown: (TapDownDetails details){
-        _timer = Timer.periodic(Duration(milliseconds: 100), (t)
-        {
+      onTapDown: (TapDownDetails details) {},
+      onLongPress: () {
+        _timer = Timer.periodic(Duration(milliseconds: 200), (t) {
           setState(() {
-          _grammCounter(value*20);
-
-
+            _timer.tick > 5
+                ? _grammCounter(value * 100)
+                : _grammCounter(value * 20);
           });
         });
       },
-      onTapUp: (TapUpDetails details){
-
+      onLongPressUp: () {
+        print("up!");
+        setState(() {
+          _roundUpGramm();
+        });
         _timer.cancel();
-
       },
-      onTapCancel: (){
-        _timer.cancel();
+      onTap: () {
+        setState(() {
+          _grammCounter(value);
+        });
       },
-
     );
   }
 
@@ -196,30 +197,34 @@ class _DetailPageState extends State<DetailPage> {
         widget.product.product.nutriments?.energyKcal100G == null
             ? Container()
             : nutritile(
-                size,
-                ((widget.product.product.nutriments!.energyKcal100G! / 100) *
-                    gramms),
-                "Kcal."),
+            size,
+            ((widget.product.product.nutriments!.energyKcal100G! / 100) *
+                gramms),
+            "Energie",
+            "kcal"),
         widget.product.product.nutriments?.proteins100G == null
             ? Container()
             : nutritile(
-                size,
-                ((widget.product.product.nutriments!.proteins100G! / 100) *
-                    gramms),
-                "Protein"),
+            size,
+            ((widget.product.product.nutriments!.proteins100G! / 100) *
+                gramms),
+            "Eiweiß",
+            "g"),
         widget.product.product.nutriments?.fat100G == null
             ? Container()
             : nutritile(
-                size,
-                ((widget.product.product.nutriments!.fat100G! / 100) * gramms),
-                "fat"),
+            size,
+            ((widget.product.product.nutriments!.fat100G! / 100) * gramms),
+            "Fett",
+            "g"),
         widget.product.product.nutriments?.sugars100G == null
             ? Container()
             : nutritile(
-                size,
-                ((widget.product.product.nutriments!.sugars100G! / 100) *
-                    gramms),
-                "sugar"),
+            size,
+            ((widget.product.product.nutriments!.sugars100G! / 100) *
+                gramms),
+            "Zucker",
+            "g"),
       ],
     );
   }
@@ -249,19 +254,24 @@ class _DetailPageState extends State<DetailPage> {
         : Container();
   }
 
-  Expanded nutritile(Size size, double nutriments, String nutriname) {
+  Expanded nutritile(Size size, double nutriments, String nutriname,
+      String unit) {
     return Expanded(
         flex: 2,
         child: Padding(
           padding: const EdgeInsets.all(4.0),
           child: Container(
-              padding: EdgeInsets.all(8),
+              padding: EdgeInsets.all(6),
               height: size.height * 0.06,
               decoration: BoxDecoration(
                   color: Colors.white38,
                   borderRadius: BorderRadius.circular(16),
                   border: Border.all(color: Colors.black38)),
-              child: Text("$nutriname: ${nutriments.ceil()}")),
+              child: Text("$nutriname: ${nutriments.roundToDouble()}$unit", style:
+              TextStyle(
+                  fontSize: 14,
+                  fontWeight: FontWeight.bold
+              ),)),
         ));
   }
 
@@ -277,36 +287,41 @@ class _DetailPageState extends State<DetailPage> {
   }
 
   _grammCounter(int plus) {
+    print("Trigered add $plus");
     setState(() {
       gramms = gramms + plus;
-      if(gramms%100 == 0){
-        Future.delayed(Duration(milliseconds: 1000));
-      }
     });
   }
-
-  getNumber(String? servingSize) {
-    String a = servingSize!.replaceAll(new RegExp(r'[^0-9]'), '');
+  _roundUpGramm() {
     setState(() {
-      gramms = int.parse(a);
     });
-    return a;
   }
 
-  void setServiceSizeAsDefault() {
-    widget.product.product.servingSize != null
-        ? getNumber(widget.product.product.servingSize)
-        : gramms = 50;
-  }
 
-  getNutriScore() {
-    if (widget.product.product.nutriscoreGrade != null) {
-      String grade = widget.product.product.nutriscoreGrade!;
-      return Image.asset(
-        "assets/icons/nutriscore${grade}.png",
-        scale: 9,
-      );
+    getNumber(String? servingSize) {
+      String a = servingSize!.replaceAll(new RegExp(r'[^0-9]'), '');
+      a == "0"? a = "100" : a = servingSize!;
+      setState(() {
+        gramms = int.parse(a);
+      });
+      return a;
     }
-    return Container();
+
+    void setServiceSizeAsDefault() {
+      widget.product.product.productQuantity != null
+          ? getNumber(widget.product.product.productQuantity)
+          : widget.product.product.servingSize != null ?
+      getNumber(widget.product.product.servingSize) : gramms = 100;
+    }
+
+    getNutriScore() {
+      if (widget.product.product.nutriscoreGrade != null) {
+        String grade = widget.product.product.nutriscoreGrade!;
+        return Image.asset(
+          "assets/icons/nutriscore${grade}.png",
+          scale: 9,
+        );
+      }
+      return Container();
+    }
   }
-}

@@ -13,6 +13,7 @@ import '../../service/testRequestService.dart';
 import '../../service/utils/ProductApi.dart';
 import '../../utils/Category.dart';
 import '../homescreen/components/searchBar.dart';
+import 'ScannedDetail.dart';
 
 class BarcodeBody extends StatefulWidget {
   BarcodeBody({Key? key}) : super(key: key);
@@ -149,10 +150,14 @@ class _BarcodeBodyState extends State<BarcodeBody> {
         storeProducts(products);
 
         setState(() {
+          Navigator.of(context).push(MaterialPageRoute(
+              builder: (context) => DetailPage(product: data)));
           products.add(data);
           // Newest to top.
           products = products.reversed.toList();
         });
+
+
 
         List<Map<String, dynamic>> jsonList = [];
         for (Product p in products) {
@@ -166,6 +171,6 @@ class _BarcodeBodyState extends State<BarcodeBody> {
   }
 
   void simulateProduct() {
-    getdataPost("20224462");
+    getdataPost("21755118");
   }
 }
